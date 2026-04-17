@@ -1,0 +1,255 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Laundry Service | Eamel Laundry - Order Online Now</title>
+    <meta
+      name="description"
+      content="Book your laundry service online at Eamel Laundry. Easy online booking for wash & fold, dry cleaning, and ironing. Fast pickup, quality service, affordable prices. Order now!"
+    />
+    <meta
+      name="keywords"
+      content="book laundry service, laundry booking online, order laundry pickup, laundry delivery service, schedule laundry, laundry order form, online laundry booking"
+    />
+    <meta name="author" content="Eamel Laundry" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <link rel="canonical" href="https://eamel-laundry.com/booking.html" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://eamel-laundry.com/booking.html" />
+    <meta
+      property="og:title"
+      content="Book Laundry Service | Eamel Laundry - Order Online Now"
+    />
+    <meta
+      property="og:description"
+      content="Book your laundry service online at Eamel Laundry. Easy online booking for wash & fold, dry cleaning, and ironing. Fast pickup, quality service, affordable prices."
+    />
+    <meta
+      property="og:image"
+      content="https://eamel-laundry.com/assets/logo.jpg"
+    />
+    <meta property="og:site_name" content="Eamel Laundry" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://eamel-laundry.com/booking.html"
+    />
+    <meta
+      property="twitter:title"
+      content="Book Laundry Service | Eamel Laundry - Order Online Now"
+    />
+    <meta
+      property="twitter:description"
+      content="Book your laundry service online at Eamel Laundry. Easy online booking for wash & fold, dry cleaning, and ironing. Fast pickup, quality service, affordable prices."
+    />
+    <meta
+      property="twitter:image"
+      content="https://eamel-laundry.com/assets/logo.jpg"
+    />
+
+    <!-- Structured Data for Booking Page -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Book Laundry Service",
+        "description": "Online booking page for Eamel Laundry services including wash & fold, dry cleaning, and ironing.",
+        "url": "https://eamel-laundry.com/booking.html",
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "Eamel Laundry",
+          "url": "https://eamel-laundry.com"
+        },
+        "mainEntity": {
+          "@type": "LocalBusiness",
+          "name": "Eamel Laundry",
+          "url": "https://eamel-laundry.com",
+          "logo": "https://eamel-laundry.com/assets/logo.jpg",
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "Nigeria"
+          },
+          "telephone": "+234-XXX-XXXXXXX",
+          "priceRange": "$$",
+          "paymentAccepted": "Cash, Card",
+          "currenciesAccepted": "NGN"
+        }
+      }
+    </script>
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav>
+      <img src="./assets/logo.jpg" class="logo" />
+      <div>
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="booking.html">Order</a>
+        <a href="contact.html">Contact</a>
+        <a href="admin.html">Admin</a>
+      </div>
+    </nav>
+
+    <section class="booking-intro">
+      <div class="intro-content">
+        <h1>Book Your Laundry Service</h1>
+        <p>Convenient pickup and delivery right at your doorstep.</p>
+      </div>
+      <img src="./assets/hero3.jpg" alt="Laundry Service" class="intro-image" />
+    </section>
+
+    <h2>Fill in Your Details</h2>
+
+    <form id="bookingForm" class="booking-form">
+      <div class="form-group">
+        <input
+          type="text"
+          name="customerName"
+          placeholder="Full Name"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <input type="tel" name="phone" placeholder="Phone Number" required />
+      </div>
+      <div class="form-group">
+        <input type="email" name="email" placeholder="Email (Optional)" />
+      </div>
+      <div class="form-group">
+        <input
+          type="text"
+          name="address"
+          placeholder="Delivery Address (minimum 10 characters)"
+          required
+        />
+      </div>
+
+      <div class="order-form">
+        <label></label>
+        <select id="category" name="category" required>
+          <option value="">Select Category</option>
+          <option value="premium">Premium</option>
+          <option value="children">Children Ware</option>
+          <option value="linen">Home Linens</option>
+        </select>
+
+        <label>Items</label>
+        <select id="item" name="item">
+          <option value="">Select Item</option>
+        </select>
+
+        <label>Quantity</label>
+        <input type="number" id="quantity" min="1" value="1" />
+
+        <label>Service </label>
+        <select id="service" name="service">
+          <option value="">Select Service</option>
+          <option value="wash-fold">Wash & Iron</option>
+          <option value="dry-clean">Wash</option>
+          <option value="ironing">Iron</option>
+        </select>
+
+        <h3>Total Price: ₦<span id="price">0</span></h3>
+
+        <button id="addBtn">Add Selection</button>
+        <h3>Selected Items</h3>
+        <table border="1" width="100%">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Item</th>
+              <th>Service</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="cartTable"></tbody>
+        </table>
+        <h2>Total:₦<span id="grandTotal">0</span></h2>
+      </div>
+
+      <div class="form-group">
+        <label for="pickupDate">Pickup Date</label>
+        <input type="date" name="pickupDate" id="pickupDate" required />
+      </div>
+      <div class="form-group">
+        <label for="deliveryDate">Delivery Date</label>
+        <input type="date" name="deliveryDate" id="deliveryDate" required />
+      </div>
+      <div class="form-group">
+        <textarea
+          name="specialInstructions"
+          placeholder="Special Instructions (Optional)"
+          rows="3"
+        ></textarea>
+      </div>
+      <button type="submit" class="btn">Submit Booking</button>
+    </form>
+
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-col">
+          <h3>Eamel Laundry</h3>
+          <p>Premium laundry solutions with fast pickup & delivery in Jos.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="services.html">Services</a>
+          <a href="booking.html">Order</a>
+          <a href="contact.html">Contact</a>
+          <a href="admin.html">Admin</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Follow Us</h4>
+          <div class="socials">
+            <a href="https://wa.me/2348107495967"
+              ><i class="fab fa-whatsapp"></i
+            ></a>
+            <a href="https://facebook.com/Eamel"
+              ><i class="fab fa-facebook"></i
+            ></a>
+            <a href="https://instagram.com/eameljos"
+              ><i class="fab fa-instagram"></i
+            ></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Newsletter</h4>
+          <form class="newsletter">
+            <input type="email" placeholder="Enter your email" required />
+            <button>Subscribe</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="map">
+        <iframe
+          src="https://maps.google.com/maps?q=zamaganda%20rayfiela%20road%20jos&t=&z=13&ie=UTF8&iwloc=&output=embed"
+        ></iframe>
+      </div>
+
+      <p class="footer-bottom">© 2026 Eamel Laundry</p>
+    </footer>
+
+    <script src="./js/booking.js"></script>
+  </body>
+</html>
