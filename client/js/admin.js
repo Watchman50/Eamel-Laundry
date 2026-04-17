@@ -3,6 +3,7 @@ let authToken = null;
 let currentOrders = [];
 let currentPage = 1;
 const ordersPerPage = 10;
+let isLoading = false;
 
 // DOM Elements - moved to function for safe lookup after DOM ready
 let loginPage,
@@ -88,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-
   // Check if already logged in
   const token = localStorage.getItem("authToken");
   if (token) {
@@ -116,14 +116,18 @@ function showDashboard() {
   startAutoRefresh(); // Auto-update orders
 }
 
-
 // Load dashboard data
 async function loadDashboardData() {
+  if (isLoading) return; // 🚫 prevent multiple simultaneous calls
+  isLoading = true;
+
   try {
     await Promise.all([loadOrders(), loadDashboardStats()]);
   } catch (error) {
     console.error("Error loading dashboard data:", error);
     showMessage("Failed to load dashboard data", "error");
+  } finally {
+    isLoading = false; // ✅ always reset
   }
 }
 
@@ -139,7 +143,6 @@ function stopAutoRefresh() {
     refreshInterval = null;
   }
 }
-
 
 // Load orders
 async function loadOrders(page = 1) {
@@ -193,7 +196,7 @@ async function loadOrders(page = 1) {
 // Load dashboard statistics
 async function loadDashboardStats() {
   try {
-  const response = await fetch("/api/dashboard/stats", {
+    const response = await fetch("/api/dashboard/stats", {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -375,7 +378,6 @@ function viewOrderDetails(orderId) {
 async function fetchAndShowOrderDetails(orderId) {
   try {
     const response = await fetch(`/api/orders/${orderId}`, {
-
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
