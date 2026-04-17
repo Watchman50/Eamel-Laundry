@@ -4,7 +4,7 @@ let currentPage = 1;
 const ordersPerPage = 10;
 
 // Load dashboard data on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   loadDashboard();
 });
 
@@ -13,7 +13,7 @@ async function loadDashboard() {
   try {
     // Get URL parameter for order tracking
     const urlParams = new URLSearchParams(window.location.search);
-    const trackOrderId = urlParams.get('track');
+    const trackOrderId = urlParams.get("track");
 
     if (trackOrderId) {
       // Track specific order
@@ -23,18 +23,18 @@ async function loadDashboard() {
       await loadUserOrders();
     }
   } catch (error) {
-    console.error('Error loading dashboard:', error);
-    showMessage('Failed to load dashboard data', 'error');
+    console.error("Error loading dashboard:", error);
+    showMessage("Failed to load dashboard data", "error");
   }
 }
 
 // Track specific order by ID
 async function trackOrder(orderId) {
   try {
-    const response = await fetch(`http://localhost:3000/api/track/${orderId}`);
+    const response = await fetch(`/api/track/${orderId}`);
 
     if (!response.ok) {
-      throw new Error('Order not found');
+      throw new Error("Order not found");
     }
 
     const result = await response.json();
@@ -45,14 +45,14 @@ async function trackOrder(orderId) {
       throw new Error(result.message);
     }
   } catch (error) {
-    console.error('Error tracking order:', error);
+    console.error("Error tracking order:", error);
     showOrderNotFound();
   }
 }
 
 // Load user's orders (requires authentication)
 async function loadUserOrders() {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem("authToken");
 
   if (!token) {
     showLoginPrompt();
@@ -60,7 +60,7 @@ async function loadUserOrders() {
   }
 
   try {
-    const response = await fetch('http://localhost:3000/api/orders', {
+    const response = await fetch("/api/orders", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -69,11 +69,11 @@ async function loadUserOrders() {
     if (!response.ok) {
       if (response.status === 401) {
         // Token expired, redirect to login
-        localStorage.removeItem('authToken');
+        localStorage.removeItem("authToken");
         showLoginPrompt();
         return;
       }
-      throw new Error('Failed to load orders');
+      throw new Error("Failed to load orders");
     }
 
     const result = await response.json();
@@ -86,23 +86,23 @@ async function loadUserOrders() {
       throw new Error(result.message);
     }
   } catch (error) {
-    console.error('Error loading orders:', error);
-    showMessage('Failed to load orders. Please try again.', 'error');
+    console.error("Error loading orders:", error);
+    showMessage("Failed to load orders. Please try again.", "error");
   }
 }
 
 // Display order tracking information
 function displayOrderTracking(data) {
   const container =
-    document.getElementById('orders') ||
-    document.querySelector('.dashboard-content');
+    document.getElementById("orders") ||
+    document.querySelector(".dashboard-content");
 
   if (!container) {
-    console.error('No container found for order tracking');
+    console.error("No container found for order tracking");
     return;
   }
 
-  const order = data.order;
+  const { order } = data.order;
   const history = data.history || [];
 
   container.innerHTML = `
@@ -122,9 +122,9 @@ function displayOrderTracking(data) {
             ${(() => {
               const itemsInfo = parseItems(order);
               if (itemsInfo.fullItems) {
-                return `<p><strong>Items:</strong> ${itemsInfo.fullItems.map((item) => `${item.qty}x ${item.item} (${item.service})`).join(', ')}</p>`;
+                return `<p><strong>Items:</strong> ${itemsInfo.fullItems.map((item) => `${item.qty}x ${item.item} (${item.service})`).join(", ")}</p>`;
               }
-              return '';
+              return "";
             })()}
             <p><strong>Status:</strong> <span class="status-pill ${getStatusClass(order.status)}">${order.status}</span></p>
             <p><strong>Pickup Date:</strong> ${formatDate(order.pickup_date)}</p>
@@ -145,14 +145,14 @@ function displayOrderTracking(data) {
                   <div class="history-status ${getStatusClass(item.status)}">${item.status}</div>
                   <div class="history-details">
                     <div class="history-date">${formatDateTime(item.created_at)}</div>
-                    ${item.notes ? `<div class="history-notes">${item.notes}</div>` : ''}
+                    ${item.notes ? `<div class="history-notes">${item.notes}</div>` : ""}
                     <div class="history-by">Updated by: ${item.changed_by}</div>
                   </div>
                 </div>
               `,
                     )
-                    .join('')
-                : '<p>No history available</p>'
+                    .join("")
+                : "<p>No history available</p>"
             }
           </div>
         </div>
@@ -163,10 +163,10 @@ function displayOrderTracking(data) {
 
 // Display orders list
 function displayOrders(orders) {
-  const container = document.getElementById('orders');
+  const container = document.getElementById("orders");
 
   if (!container) {
-    console.error('Orders container not found');
+    console.error("Orders container not found");
     return;
   }
 
@@ -201,26 +201,26 @@ function displayOrders(orders) {
     </div>
   `,
     )
-    .join('');
+    .join("");
 }
 
 // Update pagination
 function updatePagination(pagination) {
-  const paginationEl = document.querySelector('.pagination');
+  const paginationEl = document.querySelector(".pagination");
   if (!paginationEl) return;
 
   const { page, pages, total } = pagination;
 
   if (pages <= 1) {
-    paginationEl.style.display = 'none';
+    paginationEl.style.display = "none";
     return;
   }
 
-  paginationEl.style.display = 'flex';
+  paginationEl.style.display = "flex";
   paginationEl.innerHTML = `
-    <button onclick="changePage(${page - 1})" ${page <= 1 ? 'disabled' : ''}>Previous</button>
+    <button onclick="changePage(${page - 1})" ${page <= 1 ? "disabled" : ""}>Previous</button>
     <span>Page ${page} of ${pages} (${total} orders)</span>
-    <button onclick="changePage(${page + 1})" ${page >= pages ? 'disabled' : ''}>Next</button>
+    <button onclick="changePage(${page + 1})" ${page >= pages ? "disabled" : ""}>Next</button>
   `;
 }
 
@@ -238,8 +238,8 @@ function viewOrderDetails(orderId) {
 // Show login prompt
 function showLoginPrompt() {
   const container =
-    document.getElementById('orders') ||
-    document.querySelector('.dashboard-content');
+    document.getElementById("orders") ||
+    document.querySelector(".dashboard-content");
 
   if (container) {
     container.innerHTML = `
@@ -258,8 +258,8 @@ function showLoginPrompt() {
 // Show order not found
 function showOrderNotFound() {
   const container =
-    document.getElementById('orders') ||
-    document.querySelector('.dashboard-content');
+    document.getElementById("orders") ||
+    document.querySelector(".dashboard-content");
 
   if (container) {
     container.innerHTML = `
@@ -284,12 +284,12 @@ function parseItems(order) {
     const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
     const summary = items
       .map((item) => {
-        const serviceName = item.service.replace('-', ' & ');
-        return `${item.qty}x ${item.item.replace(/-/g, ' ').replace(/\\b([a-z])/g, (m) => m.toUpperCase())} (${serviceName})`;
+        const serviceName = item.service.replace("-", " & ");
+        return `${item.qty}x ${item.item.replace(/-/g, " ").replace(/\\b([a-z])/g, (m) => m.toUpperCase())} (${serviceName})`;
       })
-      .join(', ');
+      .join(", ");
     return {
-      summary: summary.slice(0, 40) + '...',
+      summary: summary.slice(0, 40) + "...",
       totalQty,
       fullItems: items,
     };
@@ -302,12 +302,12 @@ function formatServiceName(order) {
   const itemsInfo = parseItems(order);
   if (itemsInfo.summary) return itemsInfo.summary;
   const serviceNames = {
-    'wash-fold': 'Wash & Fold',
-    'dry-cleaning': 'Dry Cleaning',
-    'wash-iron': 'Wash & Iron',
-    ironing: 'Ironing Only',
+    "wash-fold": "Wash & Fold",
+    "dry-cleaning": "Dry Cleaning",
+    "wash-iron": "Wash & Iron",
+    ironing: "Ironing Only",
   };
-  return serviceNames[order.service] || order.service || 'N/A';
+  return serviceNames[order.service] || order.service || "N/A";
 }
 
 function getOrderQty(order) {
@@ -317,75 +317,75 @@ function getOrderQty(order) {
 
 function formatDate(dateString) {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 }
 
 function formatDateTime(dateString) {
   const date = new Date(dateString);
-  return date.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
 function getStatusClass(status) {
   switch (status?.toLowerCase()) {
-    case 'completed':
-    case 'delivered':
-      return 'completed';
-    case 'pending':
-    case 'confirmed':
-      return 'pending';
-    case 'processing':
-    case 'in progress':
-      return 'pending';
-    case 'ready':
-      return 'completed';
-    case 'cancelled':
-      return 'cancelled';
+    case "completed":
+    case "delivered":
+      return "completed";
+    case "pending":
+    case "confirmed":
+      return "pending";
+    case "processing":
+    case "in progress":
+      return "pending";
+    case "ready":
+      return "completed";
+    case "cancelled":
+      return "cancelled";
     default:
-      return 'pending';
+      return "pending";
   }
 }
 
-function showMessage(message, type = 'info') {
+function showMessage(message, type = "info") {
   // Remove existing messages
-  const existingMessages = document.querySelectorAll('.message');
+  const existingMessages = document.querySelectorAll(".message");
   existingMessages.forEach((msg) => msg.remove());
 
   // Create message element
-  const messageEl = document.createElement('div');
+  const messageEl = document.createElement("div");
   messageEl.className = `message message-${type}`;
   messageEl.textContent = message;
 
   // Style the message
   Object.assign(messageEl.style, {
-    position: 'fixed',
-    top: '20px',
-    right: '20px',
-    padding: '15px 20px',
-    borderRadius: '8px',
-    color: 'white',
-    fontWeight: 'bold',
-    zIndex: '1000',
-    maxWidth: '400px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+    position: "fixed",
+    top: "20px",
+    right: "20px",
+    padding: "15px 20px",
+    borderRadius: "8px",
+    color: "white",
+    fontWeight: "bold",
+    zIndex: "1000",
+    maxWidth: "400px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
   });
 
   // Set background color based on type
   const colors = {
-    success: '#10b981',
-    error: '#ef4444',
-    warning: '#f59e0b',
-    info: '#3b82f6',
+    success: "#10b981",
+    error: "#ef4444",
+    warning: "#f59e0b",
+    info: "#3b82f6",
   };
   messageEl.style.backgroundColor = colors[type] || colors.info;
 
@@ -406,9 +406,8 @@ window.viewOrderDetails = viewOrderDetails;
 window.changePage = changePage;
 
 // Only load if we're on a page that might have orders
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadDashboard);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", loadDashboard);
 } else {
   loadDashboard();
 }
-

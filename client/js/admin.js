@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = document.getElementById("adminPassword").value;
 
       try {
-        const response = await fetch("http://localhost:3000/api/admin/login", {
+        const response = await fetch("/api/admin/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -82,17 +82,19 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutButton.addEventListener("click", () => {
       authToken = null;
       localStorage.removeItem("authToken");
+      stopAutoRefresh();
       showLogin();
       showMessage("Logged out successfully", "info");
     });
   }
+
 
   // Check if already logged in
   const token = localStorage.getItem("authToken");
   if (token) {
     authToken = token;
     showDashboard();
-    loadDashboardData();
+    //loadDashboardData();
   } else {
     showLogin();
   }
@@ -100,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Show login page
 function showLogin() {
+  stopAutoRefresh();
   loginPage.style.display = "flex";
   dashboard.style.display = "none";
   loginError.textContent = "";
@@ -110,7 +113,9 @@ function showLogin() {
 function showDashboard() {
   loginPage.style.display = "none";
   dashboard.style.display = "block";
+  startAutoRefresh(); // Auto-update orders
 }
+
 
 // Load dashboard data
 async function loadDashboardData() {
@@ -122,6 +127,20 @@ async function loadDashboardData() {
   }
 }
 
+// Auto-refresh every 10s when dashboard visible
+let refreshInterval;
+function startAutoRefresh() {
+  if (refreshInterval) clearInterval(refreshInterval);
+  refreshInterval = setInterval(loadDashboardData, 30000);
+}
+function stopAutoRefresh() {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+    refreshInterval = null;
+  }
+}
+
+
 // Load orders
 async function loadOrders(page = 1) {
   try {
@@ -130,7 +149,7 @@ async function loadOrders(page = 1) {
     );
 
     const response = await fetch(
-      `http://localhost:3000/api/orders?page=${page}&limit=${ordersPerPage}`,
+      `/api/orders?page=${page}&limit=${ordersPerPage}`,
       {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -174,7 +193,7 @@ async function loadOrders(page = 1) {
 // Load dashboard statistics
 async function loadDashboardStats() {
   try {
-    const response = await fetch("http://localhost:3000/api/dashboard/stats", {
+  const response = await fetch("/api/dashboard/stats", {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -270,7 +289,7 @@ function displayOrders(orders) {
 // Update order status
 async function updateOrderStatus(orderId, status) {
   try {
-    const response = await fetch(`http://localhost:3000/api/orders/${orderId}/status`, {
+    const response = await fetch(`/api/orders/${orderId}/status`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -309,8 +328,9 @@ async function deleteOrder(orderId) {
   }
 
   try {
-    const response = await fetch(`http://localhost:3000/api/orders/${orderId}`, {
+    const response = await fetch(`/api/orders/${orderId}`, {
       method: "DELETE",
+
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -354,7 +374,8 @@ function viewOrderDetails(orderId) {
 // Fetch order details from server
 async function fetchAndShowOrderDetails(orderId) {
   try {
-    const response = await fetch(`http://localhost:3000/api/orders/${orderId}`, {
+    const response = await fetch(`/api/orders/${orderId}`, {
+
       headers: {
         Authorization: `Bearer ${authToken}`,
       },

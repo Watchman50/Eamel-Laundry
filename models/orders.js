@@ -14,46 +14,47 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
 // Initialize database tables
 function initializeDatabase() {
-  const tables = [
-    `CREATE TABLE IF NOT EXISTS orders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      order_id TEXT UNIQUE NOT NULL,
-      customer_name TEXT NOT NULL,
-      phone TEXT NOT NULL,
-      email TEXT,
-      service TEXT,
-      quantity INTEGER DEFAULT 1,
-      items TEXT,
-      pickup_date TEXT NOT NULL,
-      delivery_date TEXT NOT NULL,
-      address TEXT NOT NULL,
-      special_instructions TEXT,
-      status TEXT DEFAULT 'pending',
-      total_amount REAL DEFAULT 0,
-      payment_status TEXT DEFAULT 'pending',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`,
+    const tables = [
+      `CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id TEXT UNIQUE NOT NULL,
+        customer_name TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        email TEXT,
+        service TEXT DEFAULT '',
+        cart TEXT,
+        pickup_date TEXT NOT NULL,
+        delivery_date TEXT NOT NULL,
+        address TEXT NOT NULL,
+        special_instructions TEXT,
+        status TEXT DEFAULT 'pending',
+        total_amount REAL DEFAULT 0,
+        payment_status TEXT DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`,
 
-    `CREATE TABLE IF NOT EXISTS order_history (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      order_id INTEGER NOT NULL,
-      status TEXT NOT NULL,
-      notes TEXT,
-      changed_by TEXT DEFAULT 'system',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (order_id) REFERENCES orders (id)
-    )`,
 
-    `CREATE TABLE IF NOT EXISTS admin_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      admin_username TEXT NOT NULL,
-      action TEXT NOT NULL,
-      details TEXT,
-      ip_address TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`,
-  ];
+      `CREATE TABLE IF NOT EXISTS order_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id INTEGER NOT NULL,
+        status TEXT NOT NULL,
+        notes TEXT,
+        changed_by TEXT DEFAULT 'system',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (order_id) REFERENCES orders (id)
+      )`,
+
+      `CREATE TABLE IF NOT EXISTS admin_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        admin_username TEXT NOT NULL,
+        action TEXT NOT NULL,
+        details TEXT,
+        ip_address TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`,
+    ];
+
 
   tables.forEach((sql, index) => {
     db.run(sql, (err) => {
@@ -75,9 +76,10 @@ function initializeDatabase() {
     const existingColumns = columns.map((col) => col.name);
     const migrationQueries = [];
 
-    if (!existingColumns.includes("items")) {
-      migrationQueries.push(`ALTER TABLE orders ADD COLUMN items TEXT`);
+    if (!existingColumns.includes("cart")) {
+      migrationQueries.push(`ALTER TABLE orders ADD COLUMN cart TEXT`);
     }
+
     if (!existingColumns.includes("payment_status")) {
       migrationQueries.push(
         `ALTER TABLE orders ADD COLUMN payment_status TEXT DEFAULT 'pending'`,
@@ -114,9 +116,7 @@ class Order {
       customerName,
       phone,
       email,
-      service,
-      quantity = 1,
-      items,
+      cart,
       totalAmount,
       pickupDate,
       deliveryDate,
@@ -127,24 +127,13 @@ class Order {
     // Generate unique order ID
     const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
 
-    const servicePrices = {
-      "wash-fold": 1500,
-      "dry-cleaning": 2500,
-      "wash-iron": 2000,
-      ironing: 1000,
-    };
-    const finalQuantity = quantity || 1;
-    const calculatedAmount = servicePrices[service]
-      ? servicePrices[service] * finalQuantity
-      : 0;
-    const finalTotalAmount =
-      totalAmount && totalAmount > 0 ? totalAmount : calculatedAmount;
-    const finalItems = items ? JSON.stringify(items) : null;
-    const finalService = service || null;
+    const finalCart = cart ? JSON.stringify(cart) : null;
+    const finalTotalAmount = parseFloat(totalAmount) || 0;
 
     const sql = `INSERT INTO orders
-      (order_id, customer_name, phone, email, service, quantity, items, pickup_date, delivery_date, address, special_instructions, total_amount)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      (order_id, customer_name, phone, email, service, cart, pickup_date, delivery_date, address, special_instructions, total_amount)
+      VALUES (?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?)`;
+
 
     db.run(
       sql,
@@ -153,9 +142,7 @@ class Order {
         customerName,
         phone,
         email || null,
-        finalService,
-        finalQuantity,
-        finalItems,
+        finalCart,
         pickupDate,
         deliveryDate,
         address,
@@ -178,6 +165,7 @@ class Order {
       },
     );
   }
+
 
   // Get all orders with pagination
   static getAll(page = 1, limit = 10, status = null, callback) {
@@ -244,9 +232,10 @@ class Order {
 
   // Get order by order_id
   static getByOrderId(orderId, callback) {
-    const sql = `SELECT * FROM orders WHERE order_id = ?`;
+    const sql = `SELECT *, cart FROM orders WHERE order_id = ?`;
     db.get(sql, [orderId], callback);
   }
+
 
   // Update order status
   static updateStatus(

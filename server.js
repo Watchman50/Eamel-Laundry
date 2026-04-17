@@ -10,10 +10,12 @@ const { body, validationResult } = require("express-validator");
 const Order = require("./models/orders");
 const {
   authenticateToken,
-  authenticateAdmin,
+  adminLogin,
   validateOrderInput,
   sanitizeInput,
 } = require("./middleware/auth");
+
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -105,20 +107,8 @@ app.get("/api/health", (req, res) => {
 });
 
 // Admin login
-app.post("/api/admin/login", authenticateAdmin, (req, res) => {
-  // Log admin login
-  Order.logAdminAction(req.body.username, "login", "Admin logged in", req.ip);
+app.post("/api/admin/login", adminLogin);
 
-  res.json({
-    success: true,
-    message: "Login successful",
-    token: req.token,
-    user: {
-      username: req.body.username,
-      role: "admin",
-    },
-  });
-});
 
 // Create new order (public)
 app.post("/api/orders", validateOrderInput, (req, res) => {
@@ -131,9 +121,11 @@ app.post("/api/orders", validateOrderInput, (req, res) => {
     deliveryDate: req.body.deliveryDate,
     address: req.body.address,
     specialInstructions: req.body.specialInstructions,
-    cart: JSON.stringify(req.body.cart), // Store cart as JSON string
-    totalAmount: parseFloat(rawTotal) || 0,
+    cart: JSON.stringify(req.body.cart || []),
+    totalAmount: parseFloat(req.body.totalAmount) || 0,
   };
+
+
 
   Order.create(orderData, (err, result) => {
     if (err) {
@@ -143,6 +135,19 @@ app.post("/api/orders", validateOrderInput, (req, res) => {
         message: "Failed to create order",
       });
     }
+
+    // MOCK WhatsApp notification to admin (real Twilio later)
+    const adminMessage =
+      `🚨 NEW ORDER! ORD-${result.orderId}\n` +
+      `Customer: ${orderData.customerName}\n` +
+      `Phone: ${orderData.phone}\n` +
+      `Total: ₦${orderData.totalAmount.toLocaleString()}\n` +
+      `Pickup: ${orderData.pickupDate}\n` +
+      `Items: ${orderData.cart.items ? orderData.cart.items.length : "Multiple"}`;
+
+    console.log("📱 MOCK WhatsApp sent to admin(s):", adminMessage);
+    // TODO: Real Twilio - require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN)
+    // .messages.create({ from: process.env.TWILIO_WHATSAPP_FROM, to: process.env.ADMIN_PHONE, body: adminMessage })
 
     res.status(201).json({
       success: true,
@@ -160,7 +165,7 @@ app.get("/api/orders", authenticateToken, (req, res) => {
 
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  const status = req.query.status;
+  const { status } = req.query;
 
   Order.getAll(page, limit, status, (err, result) => {
     if (err) {
@@ -318,7 +323,7 @@ app.get("/api/dashboard/stats", authenticateToken, (req, res) => {
 
 // Track order by order ID (public)
 app.get("/api/track/:orderId", (req, res) => {
-  const orderId = req.params.orderId;
+  const { orderId } = req.params;
 
   Order.getByOrderId(orderId, (err, order) => {
     if (err) {

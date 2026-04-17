@@ -25,36 +25,35 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Admin authentication middleware
-const authenticateAdmin = (req, res, next) => {
+// Admin login - now returns token directly (use in server.js route)
+const adminLogin = (req, res) => {
   const { username, password } = req.body;
 
-  // Check if credentials match environment variables
   if (username !== process.env.ADMIN_USERNAME) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid credentials",
-    });
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid credentials" });
   }
 
-  // Verify password
   bcrypt.compare(password, process.env.ADMIN_PASSWORD, (err, isValid) => {
     if (err || !isValid) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
-      { username: username, role: "admin" },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE },
+      { username, role: "admin" },
+      process.env.JWT_SECRET || "fallback-secret",
+      { expiresIn: process.env.JWT_EXPIRE || "24h" },
     );
 
-    req.token = token;
-    next();
+    res.json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: { username, role: "admin" },
+    });
   });
 };
 
@@ -69,9 +68,7 @@ const validateOrderInput = (req, res, next) => {
     errors.push("Customer name must be at least 2 characters long");
   }
 
-  if (
-    !phone || phone.trim().length < 8
-  ) {
+  if (!phone || phone.trim().length < 8) {
     errors.push("Valid phone number is required (min 8 digits)");
   }
 
@@ -139,7 +136,7 @@ const sanitizeInput = (req, res, next) => {
 
 module.exports = {
   authenticateToken,
-  authenticateAdmin,
+  adminLogin,
   validateOrderInput,
   sanitizeInput,
 };

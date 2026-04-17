@@ -161,11 +161,61 @@ document.addEventListener('DOMContentLoaded', function () {
     alert(msg);
   }
 
-  // Submit original
-  bookingForm?.addEventListener('submit', (e) => {
+// Real order submission
+  bookingForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    alert('Submitted with cart: ' + JSON.stringify(cart));
+
+    const formData = new FormData(bookingForm);
+    const customerName = formData.get('customerName')?.trim() || '';
+    const phone = formData.get('phone')?.replace(/[^0-9+]/g, '') || '';
+    const email = formData.get('email')?.trim() || '';
+    const pickupDate = formData.get('pickupDate');
+    const deliveryDate = formData.get('deliveryDate');
+    const address = formData.get('address')?.trim() || '';
+    const specialInstructions = formData.get('specialInstructions')?.trim() || '';
+    
+    const grandTotalText = grandTotalSpan.textContent || '0';
+    const totalAmount = parseFloat(grandTotalText.replace(/[₦,]/g, '')) || 0;
+    
+    if (customerName.length < 2 || phone.length < 10 || address.length < 10 || !cart.length || !pickupDate || !deliveryDate || totalAmount <= 0) {
+      showMessage('Please fill all required fields and add items to cart.');
+      return;
+    }
+    
+    const orderData = {
+      customerName,
+      phone,
+      email: email || null,
+      pickupDate,
+      deliveryDate,
+      address,
+      specialInstructions: specialInstructions || null,
+      cart: cart,
+      totalAmount
+    };
+
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        showMessage(`Order created! ID: ${result.order.orderId}`);
+        bookingForm.reset();
+        cart = [];
+        renderCart();
+      } else {
+        showMessage('Error: ' + (result.message || 'Failed to submit order'));
+      }
+    } catch (error) {
+      showMessage('Network error: ' + error.message);
+    }
   });
+
 
   categorySelect?.addEventListener('change', loadItems);
   serviceSelect?.addEventListener('change', updatePrice);
